@@ -1,0 +1,98 @@
+version: '3'
+
+services:
+
+  order-db:
+    image: mongo:6.0.13
+    container_name: order-db
+    restart: always
+    networks:
+      - net_docker
+    command: ["--replSet", "rs0"]
+    ports:
+      - 27017:27017
+
+  kafka:
+    container_name: kafka
+    image: obsidiandynamics/kafka
+    restart: "no"
+    ports:
+      - "2181:2181"
+      - "9092:9092"
+    networks:
+      - net_docker
+    environment:
+      KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://localhost:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+      KAFKA_RESTART_ATTEMPTS: "10"
+      KAFKA_RESTART_DELAY: "5"
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+#      LOG_LEVEL: DEBUG
+    volumes:
+      - ./data/kafka/data:/var/lib/kafka/data
+#      - ./log4j.properties:/kafka/config/log4j.properties
+
+  kafka-connect:
+    image: debezium/connect:2.7.0.Final
+    container_name: kafka-connect
+    depends_on:
+      - kafka
+      - order-db
+    ports:
+      - "8083:8083"
+    networks:
+      - net_docker
+    environment:
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_PLUGIN_PATH: /kafka/connect,/debezium/connectors
+#      LOG_LEVEL: DEBUG
+#    volumes:
+#      - ./log4j.properties:/kafka/config/log4j.properties
+
+  redpanda-console:
+    container_name: redpanda
+    image: docker.redpanda.com/redpandadata/console:v2.3.8
+    restart: on-failure
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    ports:
+      - "8081:8080"
+    networks:
+      - net_docker
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["kafka:29092"]
+    depends_on:
+      - "kafka"
+
+  order-service:
+    build: './order-service'
+    container_name: order-service
+    depends_on:
+      - order-db
+      - kafka
+    networks:
+      - net_docker
+    environment:
+      - KAFKA_BROKER=kafka:29092
+      - MONGO_DB_URI=mongodb://order-db:27017/?replicaSet=rs0
+    ports:
+      - 3000:3000
+
+networks:
+  net_docker:
+    driver: bridge
