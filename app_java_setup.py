@@ -67,3 +67,5 @@ if __name__ == "__main__":
         docker_thread.join()
     else:
         print("[PIPELINE] Encerrado devido à dependência não satisfeita (order-db).")
+
+# %%

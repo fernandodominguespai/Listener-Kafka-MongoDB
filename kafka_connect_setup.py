@@ -21,8 +21,8 @@ def is_container_running(name):
 def start_containers_if_needed():
     if is_container_running("order-db"):
         print("[INFO] Container 'order-db' está rodando.")
-        print("[INFO] Iniciando containers 'kafka' e 'kafka-connect'...")
-        return run_shell_command("docker-compose up -d kafka kafka-connect")
+        print("[INFO] Iniciando containers 'kafka', 'redpanda-console' e 'kafka-connect'...")
+        return run_shell_command("docker-compose up -d kafka redpanda-console kafka-connect")
     else:
         print("[ERRO] Container 'order-db' não está ativo. Abortei.")
         return None
