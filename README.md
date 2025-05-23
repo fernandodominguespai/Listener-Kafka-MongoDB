@@ -11,9 +11,9 @@
   * [02 - Executando manualmente via CLI(Intlij)](#02---Executando-manualmente-via-CLI-Intlij)
   * [03 - Para parar todos os containers](#03---para-parar-todos-os-containers)
 * [As aplicações executarão nas seguintes portas](#As-aplicações-executarão-nas-seguintes-portas)
-* [Acessando tópicos com Redpanda Console](#acessando-t%C3%B3picos-com-redpanda-console)
 * [Executar para iniciar a transmissao](#Executar-para-iniciar-a-transmissao)
 * [Acesso ao MongoDB](#acesso-ao-mongodb)
+* [Acessando tópicos com Redpanda Console](#acessando-t%C3%B3picos-com-redpanda-console)
 * [Autor](#Autor)
 
 ## Tecnologias
@@ -122,18 +122,6 @@ Ou então:
 * Redpanda Console: 8081
 * MongoDB (Order-DB): 27017
 
-## Acessando tópicos com Redpanda Console
-
-[Voltar ao início](#sum%C3%A1rio)
-
-Para acessar o Redpanda Console e visualizar tópicos e publicar eventos, basta acessar:
-
-http://localhost:8081
-
-Você chegará nesta página:
-
-![Redpanda](Conte%C3%BAdos/Redpanda%20Kafka.png)
-
 ### Executar para iniciar a transmissao
 
 O `script` `executa_acoes_BD_Orders_MongoDB.py` para dar o insert, update e delete.
@@ -142,25 +130,40 @@ O `script` `executa_acoes_BD_Orders_MongoDB.py` para dar o insert, update e dele
 
 Payload:
 
-```json
-{
+```sql
+db.orders.insertOne({
+  "id": "64429e987a8b646915b3735f",
   "products": [
     {
       "product": {
         "code": "COMIC_BOOKS",
-        "unitValue": 15.50
+        "unitValue": 15.5
       },
       "quantity": 3
     },
     {
       "product": {
         "code": "BOOKS",
-        "unitValue": 9.90
+        "unitValue": 9.9
       },
       "quantity": 1
     }
-  ]
-}
+  ],
+  "totalItems": 4,
+  "totalAmount": 25.4,
+  "createdAt": "2025-04-29T14:32:56.335943085",
+  "updatedAt": "2025-04-29T14:32:56.335943085"
+});
+
+
+db.orders.updateOne(
+{ id: '64429e987a8b646915b3735f' },
+{ $set: { totalItems: 1, updatedAt: new Date() } }
+);
+
+db.orders.deleteOne(
+{ id: '64429e987a8b646915b3735f' }
+);
 ```
 
 ### Acesso ao MongoDB
@@ -191,6 +194,18 @@ Para realizar queries e validar se os dados existem:
 
 [Voltar ao início](#sum%C3%A1rio)
 
+## Acessando tópicos com Redpanda Console
+
+[Voltar ao início](#sum%C3%A1rio)
+
+Para acessar o Redpanda Console e visualizar tópicos e publicar eventos, basta acessar:
+
+http://localhost:8081
+
+Você chegará nesta página onde vai encontrar o *Topico "mongo.ordersdb.orders"* que aparece logo depois da primeira interação com o BD.
+Neste voce vai ver as mensagens de insert, update e delete.
+
+![Redpanda](/Redpanda%20Kafka.png)
 
 ### Autor
 
