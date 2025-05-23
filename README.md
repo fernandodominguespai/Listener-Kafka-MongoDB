@@ -10,9 +10,9 @@
   * [01 - Execução geral via automação com script em Python](#01---Execucao-geral-via-automacao-com-script-em-Python)
   * [02 - Executando manualmente via CLI(Intlij)](#02---Executando-manualmente-via-CLI-Intlij)
   * [03 - Para parar todos os containers](#03---para-parar-todos-os-containers)
-* [As aplicações executarão nas seguintes portas](#As-aplicações-executarão-nas-seguintes-portas)
 * [Executar para iniciar a transmissao](#Executar-para-iniciar-a-transmissao)
-* [Acesso ao MongoDB](#acesso-ao-mongodb)
+* * [Acesso ao MongoDB](#acesso-ao-mongodb)
+* [As aplicações executarão nas seguintes portas](#As-aplicações-executarão-nas-seguintes-portas)
 * [Acessando tópicos com Redpanda Console](#acessando-t%C3%B3picos-com-redpanda-console)
 * [Autor](#Autor)
 
@@ -99,32 +99,15 @@ Para executar:
     2. `python kafka_connect_setup.py`
 4. Então executar a aplicação no CLI(Intlij)
 
-### 03 - Para parar todos os containers
-
-[Voltar ao nível anterior](#execu%C3%A7%C3%A3o-do-projeto)
-
-Para parar todos os containers, basta rodar:
-
-`docker-compose down` 
-
-Ou então:
-
-`docker stop ($docker ps -aq)`
-`docker container prune -f`
-
-## As aplicações executarão nas seguintes portas:
-
-[Voltar ao início](#sum%C3%A1rio)
-
-* Order-Service: 3000
-* Apache Kafka: 9092
-* Apache kafka-connect: 8083
-* Redpanda Console: 8081
-* MongoDB (Order-DB): 27017
-
 ### Executar para iniciar a transmissao
 
 O `script` `executa_acoes_BD_Orders_MongoDB.py` para dar o insert, update e delete.
+
+Para executar:
+1. Entre no diretório raiz do repositório
+2. Clicar com lado direito do mouse e "abrir o terminal"
+3. Então executar o seguinte comando:
+   1. `python executa_acoes_BD_Orders_MongoDB.py`
 
 [Voltar ao início](#sum%C3%A1rio)
 
@@ -194,9 +177,30 @@ Para realizar queries e validar se os dados existem:
 
 [Voltar ao início](#sum%C3%A1rio)
 
-## Acessando tópicos com Redpanda Console
+### 03 - Para parar todos os containers
+
+Para parar todos os containers, basta rodar:
+
+`docker-compose down` 
+
+Ou então:
+
+`docker stop ($docker ps -aq)`
+`docker container prune -f`
 
 [Voltar ao início](#sum%C3%A1rio)
+
+## As aplicações executarão nas seguintes portas:
+
+* Order-Service: 3000
+* Apache Kafka: 9092
+* Apache kafka-connect: 8083
+* Redpanda Console: 8081
+* MongoDB (Order-DB): 27017
+
+  [Voltar ao início](#sum%C3%A1rio)
+
+## Acessando tópicos com Redpanda Console
 
 Para acessar o Redpanda Console e visualizar tópicos e publicar eventos, basta acessar:
 
@@ -206,6 +210,8 @@ Você chegará nesta página onde vai encontrar o *Topico "mongo.ordersdb.orders
 Neste voce vai ver as mensagens de insert, update e delete.
 
 ![Redpanda](/Redpanda%20Kafka.png)
+
+[Voltar ao início](#sum%C3%A1rio)
 
 ### Autor
 

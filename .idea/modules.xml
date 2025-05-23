@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Listener Kafka MongoDB.iml" filepath="$PROJECT_DIR$/.idea/Listener Kafka MongoDB.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service.main.iml" />
     </modules>
   </component>
 </project>

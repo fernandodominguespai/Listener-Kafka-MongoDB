@@ -3,9 +3,8 @@ package br.com.microservices.listenerMongoDB.orderservice.core.consumer;
 import br.com.microservices.listenerMongoDB.orderservice.core.document.Event;
 import br.com.microservices.listenerMongoDB.orderservice.core.document.MongoKey;
 import br.com.microservices.listenerMongoDB.orderservice.core.document.Order;
+import br.com.microservices.listenerMongoDB.orderservice.core.utils.JsonUtil;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -19,11 +18,10 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+//@AllArgsConstructor
 public class EventConsumer {
 
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
+//    private final JsonUtil jsonUtil;
 
     @KafkaListener(topics = "mongo.ordersdb.orders", groupId = "order-group")
     public void listen(ConsumerRecord<String, String> record) {
@@ -36,20 +34,20 @@ public class EventConsumer {
                 return;
             }
 
-            Event event = objectMapper.readValue(value, Event.class);
+            Event event = JsonUtil.toObject(value, Event.class);
 
             Order after = null;
             Order before = null;
 
             if (StringUtils.hasText(event.getAfter())) {
-                after = objectMapper.readValue(event.getAfter(), Order.class);
+                after = JsonUtil.toObject(event.getAfter(), Order.class);
             }
             if (StringUtils.hasText(event.getBefore())) {
-                before = objectMapper.readValue(event.getBefore(), Order.class);
+                before = JsonUtil.toObject(event.getBefore(), Order.class);
             }
 
             // Extrai o _id do Kafka KEY se before estiver null
-            MongoKey mongoKey = objectMapper.readValue(key, MongoKey.class);
+            MongoKey mongoKey = JsonUtil.toObject(key, MongoKey.class);
 
             String operation = event.getOp();
             switch (operation) {
@@ -59,7 +57,7 @@ public class EventConsumer {
                     if (event.getBefore() != null) {
                         handleDelete(before.getId());
                     } else {
-                        String id = objectMapper.readTree(mongoKey.getId()).get("$oid").asText();
+                        String id = JsonUtil.toJsonNode(mongoKey.getId()).get("$oid").asText();
                         handleDelete(id);
                     }
                 }
@@ -91,7 +89,7 @@ public class EventConsumer {
 
         if (updateDescription != null && StringUtils.hasText(updateDescription.getUpdatedFields())) {
             try {
-                JsonNode updatedFields = objectMapper.readTree(updateDescription.getUpdatedFields());
+                JsonNode updatedFields = JsonUtil.toJsonNode(updateDescription.getUpdatedFields());
                 log.info("🔧 Campos atualizados:\n{}", updatedFields.toPrettyString());
             } catch (Exception e) {
                 log.warn("⚠️ Falha ao ler updatedFields: {}", e.getMessage());

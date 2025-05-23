@@ -1,29 +1,35 @@
 package br.com.microservices.listenerMongoDB.orderservice.core.utils;
 
-import br.com.microservices.listenerMongoDB.orderservice.core.document.Event;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 
-@Component
-@AllArgsConstructor
+@UtilityClass
 public class JsonUtil {
 
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    public String toJson(Object object) {
+    public static <T> T toObject(String json, Class<T> clazz) {
         try {
-            return objectMapper.writeValueAsString(object);
-        } catch (Exception ex) {
-            return "";
+            return mapper.readValue(json, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao desserializar JSON para " + clazz.getSimpleName(), e);
         }
     }
 
-    public Event toEvent(String json) {
+    public static JsonNode toJsonNode(String json) {
         try {
-            return objectMapper.readValue(json, Event.class);
-        } catch (Exception ex) {
-            return null;
+            return mapper.readTree(json);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao converter JSON em JsonNode", e);
+        }
+    }
+
+    public static String pretty(String json) {
+        try {
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(toJsonNode(json));
+        } catch (Exception e) {
+            return json; // retorna bruto em caso de erro
         }
     }
 }
